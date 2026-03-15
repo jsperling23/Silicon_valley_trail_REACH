@@ -21,7 +21,7 @@ class Runner():
         random_event = self.random_event()
         self.weather_request()
         self._game.advance_location()
-
+        
         return True
 
     def random_event(self) -> Event | None:
