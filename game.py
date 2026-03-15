@@ -1,5 +1,5 @@
 import random
-from map import Location, LOCATIONS
+from data import Location, LOCATIONS
 
 
 class Game:
@@ -7,11 +7,11 @@ class Game:
         self._cash = 0
         self._coffee = 0
         self._bugs = 0
-        self._tech_debt = 0
         self._morale = 0
         self._hype = 0
         self._location_index = 0
         self._started = False
+        self._day = 0
 
     @classmethod
     def new_game(cls) -> "Game":
@@ -19,7 +19,6 @@ class Game:
         game.update_cash(random.randint(50, 100))
         game.update_coffee(random.randint(50, 70))
         game.update_bugs(random.randint(0, 20))
-        game.update_tech_debt(random.randint(0, 10))
         game.update_morale(random.randint(80, 100))
         game.update_hype(random.randint(0, 20))
         game._started = True
@@ -30,7 +29,6 @@ class Game:
         return {"Cash": self._cash,
                 "Coffee": self._coffee,
                 "Bugs": self._bugs,
-                "Tech Debt": self._tech_debt,
                 "Morale": self._morale,
                 "Hype": self._hype,
                 "Location": LOCATIONS[self._location_index]}
@@ -44,17 +42,22 @@ class Game:
             return LOCATIONS[self._location_index]
         else:
             self._location_index += 1
+            self._day += 1
             return LOCATIONS[self._location_index]
 
     @property
-    def get_cash(self) -> int:
+    def current_day(self) -> int:
+        return self._day
+
+    @property
+    def current_cash(self) -> int:
         return self._cash
 
     def update_cash(self, value) -> None:
         self._cash += value
 
     @property
-    def get_coffee(self) -> int:
+    def current_coffee(self) -> int:
         return self._coffee
 
     def update_coffee(self, value) -> None:
@@ -66,13 +69,6 @@ class Game:
 
     def update_bugs(self, value) -> None:
         self._bugs += value
-
-    @property
-    def current_tech_debt(self) -> int:
-        return self._tech_debt
-
-    def update_tech_debt(self, value) -> None:
-        self._tech_debt += value
 
     @property
     def current_morale(self) -> int:
