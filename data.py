@@ -33,6 +33,15 @@ class Event:
     hype: int
 
 
+SIDE_EFFECTS = {
+    "Hot": Event("Hot", 0, 0, 5, -5, 0),
+    "Mild": Event("Mild", 0, 0, 0, 0, 0),
+    "Cold": Event("Cold", 0, -5, 0, -5, 0),
+    "Dry": Event("Dry", 0, 0, 0, 0, 0),
+    "Wet": Event("Wet", -5, 0, 0, -5, 0)
+}
+
+
 CHOICES = [
     Event("Pitch to an Investor", 10, -5, 0, 10, 0),
     Event("Speak at a Conferece", 0, -5, 0, 0, 10),
@@ -41,13 +50,14 @@ CHOICES = [
     Event("Rest", 0, 0, 5, 10, 10)
 ]
 
+
 RANDOM_EVENT = [
     Event("Freak Thunderstorm", -20, 0, 0, -20, 0),
-    Event("Positive Investor Email", +20, 0, 0, +20, +20),
+    Event("Positive Investor Email", +20, 0, 0, 20, 20),
     Event("Git Force Push to Main", 0, -10, 20, -10, 0),
     Event("AWS Servers Down", 0, -10, 0, -10, -10),
     Event("Influencer Callout", 0, 0, 0, 20, 20),
     Event("Lightbulb Idea", -10, -10, 5, +10, 0),
     Event("Taco Truck!!", -10, 0, 0, 10, 0),
-    Event("Crash on 280", -10, 0, 0, -20, 0)
+    Event("Waymo Stuck Wrong Way on 280, Traffic Jam!", -10, 0, 0, -20, 0)
 ]
