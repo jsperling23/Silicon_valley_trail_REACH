@@ -106,8 +106,7 @@ class Runner():
 
     def load_game(self) -> None:
         files = os.listdir("save_files")
-        print(files)
-        return
+        pass
 
     def save_game(self) -> None:
         os.system("clear")
