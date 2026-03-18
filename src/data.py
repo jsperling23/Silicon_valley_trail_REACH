@@ -3,6 +3,15 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Location:
+    """
+    Represents a geographic location in the game.
+
+    Attributes:
+        name (str): The name of the location.
+        lat (float): Latitude of the location.
+        long (float): Longitude of the location.
+        index (int): Index of the location in the game's location list.
+    """
     name: str
     lat: float
     long: float
@@ -26,6 +35,20 @@ LOCATIONS = [
 
 @dataclass(frozen=True)
 class Event:
+    """
+    Represents an event that can affect the player's game stats.
+
+    Attributes:
+        type (str): The name or type of the event.
+        cash (int): Change in cash caused by the event.
+        coffee (int): Change in coffee caused by the event.
+        bugs (int): Change in bug count caused by the event.
+        morale (int): Change in team morale caused by the event.
+        hype (int): Change in product hype caused by the event.
+        delay (bool): Whether the event prevents the player from moving
+                      forward.
+        index (int): Index of the event in the game's event table.
+    """
     type: str
     cash: int
     coffee: int

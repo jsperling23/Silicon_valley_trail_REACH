@@ -4,6 +4,7 @@ import random
 import os
 import json
 import time
+import logging
 
 from game import Game
 from retry_requests import retry
@@ -11,7 +12,30 @@ from data import Event, RANDOM_EVENT, CHOICES, SIDE_EFFECTS
 
 
 class Runner():
-    def __init__(self):
+    """
+    Manages the main game loop and player interactions for the Silicon Valley
+    Trail game.
+
+    Responsibilities:
+        - Start a new game or load a saved game.
+        - Handle turns, including random events, weather effects,
+          and player choices.
+        - Track the game state and determine win/loss conditions.
+        - Save and load game state to and from disk.
+        - Display game stats, weather effects, and simple animations.
+
+    Attributes:
+        _logger (logging.Logger): Logger instance for structured logging.
+        _game (Game | None): The current game instance, or None if not started.
+        _weather (tuple | None): Current weather conditions as
+            (temperature, precipitation).
+        _win (bool | None): Tracks whether the player has won, lost,
+            or None if ongoing.
+        _save_flag (bool): Indicates whether the player requested to save
+            and quit.
+    """
+    def __init__(self, logger: logging.Logger):
+        self._logger = logger.getChild(self.__class__.__name__)
         self._game: Game | None = None
         self._weather: tuple | None = None
         self._win = None
@@ -22,8 +46,9 @@ class Runner():
         Method takes in in no parameters. It displays a welcome message and
         allows the user to enter an integer in order to start a new game or
         load a previous save. Both result in the self._game instance attribute
-        being filled. This method does not return anything.
+        being filled.
         """
+        self._logger.info("Game Started")
         os.system("clear")
         choice = None
         print("""
@@ -38,7 +63,7 @@ class Runner():
               Would you like to start a new game or load a previous save?
               Enter the number corresponding to your choice
               0: New Game
-              1: Load Game 
+              1: Load Game
               """)
         while choice is None:
             try:
@@ -47,13 +72,15 @@ class Runner():
                     choice = temp
                     game = self.new_game()
                     if game is False:
-                        print("Something went wrong starting a new game...")
+                        self._logger.info("Something went wrong starting a \
+                                          new game")
                 elif temp == 1:
                     game = self.load_game()
                     choice = temp
                     if game is False:
                         choice = None
-                        print("Something went wrong loading that file...")
+                        self._logger.info("Something went wrong loading that \
+                                          file...")
                 else:
                     print("Number out of bounds, try again.")
             except ValueError:
@@ -61,7 +88,9 @@ class Runner():
 
     def new_turn(self) -> None:
         """
-        Method takes in no parameters. It goes in the following o"""
+        Method takes in no parameters. It goes in the following o
+        """
+        self._logger.info("New turn started.")
         random_event = None
         if not self._game:
             return
@@ -71,7 +100,7 @@ class Runner():
             self._win = True
             return
 
-        # Setup conditions for current turn and skip random event if first
+        # Setup conditions for current turn and skip random event if first day
         changes = []
         if self._game.current_day != 0:
             random_event = self.random_event()
@@ -98,42 +127,85 @@ class Runner():
         if not self.check_stats():
             self._win = False
 
-        # Depending on the event
+        # Check whether the party can move or not depending on the random event
         if random_event is not None and random_event.delay is True:
             self.no_move_turn(random_event)
+            self._game.increment_day()
         else:
             self._game.advance_location()
         self.travel_animation()
 
         return
+
     def no_move_turn(self, random_event: Event) -> None:
+        """
+        With certain random events, the party is unable to move forward. This
+        function prints out a message letting the user know.
+        """
         os.system("clear")
         print(f"Because of {random_event.type}, you are stuck in {self._game.current_location.name}.\
               and will not move forward today")
         input("Press enter to continue")
-        self._game.increment_day()
 
     def check_stats(self) -> bool:
+        """
+        Check current game stats against win/lose conditions.
+
+        Evaluates the player's resources and game state to determine whether
+        the game should continue. If any losing condition is met (e.g., cash,
+        coffee, morale, hype depleted, or too many bugs), the game ends and
+        a message is displayed.
+
+        Returns:
+            bool: True if the player is still alive (game continues),
+            False if a losing condition has been met.
+        """
         alive = True
         if self._game:
             if self._game.current_cash <= 0:
                 alive = False
+                os.system("clear")
+                print("Unfortunately you ran out of cash and can't afford to \
+                      move on")
             elif self._game.current_coffee <= 0:
                 alive = False
-            elif self._game.current_bugs > 100:
+                os.system("clear")
+                print("Unfortunately you ran out of coffee and are too tired \
+                      to continue")
+            elif self._game.current_bugs > 50:
                 alive = False
+                os.system("clear")
+                print("Your app has too many bugs, it fails to work and you \
+                      lose.")
             elif self._game.current_morale <= 0:
                 alive = False
+                os.system("clear")
+                print("Your team is too depressed to continue, morale is too \
+                      low.")
             elif self._game.current_hype <= 0:
                 alive = False
+                os.system("clear")
+                print("The hype for your product is too low, nobody wants it. \
+                      You fail.")
             elif self._game.current_location.name == "San Francisco":
                 alive = True
         return alive
 
     def random_event(self) -> Event | None:
+        """
+        Rolls between 1 and 4 to see if a random event happens. If
+        it hits 1 then a random event is randomly chosen from the
+        random event table.
+
+        Returns:
+            Event: Event Object from RANDOM_EVENT table if the roll 1
+            None otherwise
+
+        """
         random_event = None
         chance = random.randint(1, 4)
         if chance == 1:
+            self._logger.info("A random event roll has hit")
             os.system('clear')
             print("\n----------Random Event Alert!!----------\n")
             random_event = random.choice(RANDOM_EVENT)
@@ -149,6 +221,19 @@ class Runner():
         return random_event
 
     def fill_changes_buffer(self, event: Event, changes: list) -> None:
+        """
+        Append event data to the changes buffer.
+
+        Extracts relevant attributes from the given event and stores them
+        as a list in the provided changes collection.
+
+        Args:
+            event (Event): The event containing affects game state values.
+            changes (list): A list used to accumulate change records.
+
+        Returns:
+            None
+        """
         changes.append([
             event.type,
             event.cash,
@@ -159,11 +244,29 @@ class Runner():
         ])
 
     def new_game(self) -> bool:
-        game = Game.new_game()
+        """
+        Initialize and assign a new game instance.
+
+        Returns:
+            bool: True if the game was successfully created and assigned,
+            False otherwise.
+        """
+        game = Game.new_game(self._logger)
         self._game = game
         return True if self._game else False
 
     def load_game(self) -> bool:
+        """
+        Load a saved game from disk.
+
+        Displays available save files to the user, prompts for a selection,
+        and attempts to load the chosen file. If successful, the game state
+        is restored and assigned to the instance.
+
+        Returns:
+            bool: True if the game was successfully loaded, False if an
+            error occurred during loading.
+        """
         # List save files and print them to screen
         files = os.listdir("save_files")
         os.system("Clear")
@@ -188,13 +291,19 @@ class Runner():
         try:
             with open(filepath) as f:
                 load_state = json.load(f)
-                self._game = Game.load_game(load_state)
+                self._game = Game.load_game(load_state, self._logger)
+            self._logger.info(f"File {filepath} successfully loaded")
         except Exception as e:
-            print(f"Error opening file: {e}")
+            self._logger.info(f"Error opening file: {e}")
             return False
         return True
 
     def save_game(self) -> None:
+        """
+        Save a new game to a new file.
+        Prompts the user to enter in their choice of filename and
+        attempts to save to that filename.
+        """
         os.system("clear")
         save_state = self._game.state
         file_name = input("Please enter a file name:", )
@@ -204,10 +313,15 @@ class Runner():
         try:
             with open(filepath, 'w') as f:
                 json.dump(save_state, f, indent=4)
+            self._logger.info(f"File {filepath} successfully saved")
         except Exception as e:
-            print(f"Error saving file {e}")
+            self._logger.info(f"Error saving file {e}")
 
     def get_current_stats(self) -> None:
+        """
+        Clears the screen, gets the current game stats, puts them in a
+        dictionary, and prints them to the screen
+        """
         os.system("clear")
         stats = (f"""Your Current Stats:\n
                 Cash: {self._game.current_cash}
@@ -217,17 +331,29 @@ class Runner():
                 Hype: {self._game.current_hype}
                 Current Location: {self._game.current_location.name}
                 Days on the Trail: {self._game.current_day}
-                Temperature: {self._weather[0]}
-                Precipitation: {self._weather[1]}
         """)
         print(stats)
 
     def get_user_input(self) -> Event | None:
+        """
+        Prompt the player to make a game choice or save and quit.
+
+        Displays the player's current stats and location, applies weather
+        effects, and shows all available choices. The player is repeatedly
+        prompted until they select a valid choice or choose to save and quit.
+
+        Returns:
+            Event | None: The chosen Event object if a valid choice was made,
+            or None if the player chose to save and quit.
+        """
         choice = None
         save = False
 
         # Show player their current stats and their location
         self.get_current_stats()
+
+        # Show the player how the weather affects their stats
+        self.weather_effects()
 
         # Get the players choice and verify it is correct
         while choice is None and save is False:
@@ -257,6 +383,10 @@ class Runner():
         return None if choice is None else CHOICES[choice]
 
     def travel_animation(self) -> None:
+        """
+        Iterates through a list to create an animation of a moving
+        dotted trail.
+        """
         travel_deck = [
             "Moving along the ol dusty trail.",
             "Moving along the ol dusty trail..",
@@ -269,6 +399,12 @@ class Runner():
                 time.sleep(0.5)
 
     def weather_request(self) -> None:
+        """
+        This function takes in no parameters and uses the openmeteo_requests
+        library to access the OpenMeteo API and get the current weather
+        for the location of the player. If something goes wrong with the
+        request, randomized mock data is used instead.
+        """
         cur_temp = None
         cur_precip = None
         try:
@@ -304,8 +440,10 @@ class Runner():
             else:
                 cur_precip = "Raining"
 
+            self._logger.info("Weather successfully obtained from OpenMeteo")
+
         except Exception as e:
-            print(f"Weather request failed: {e}")
+            self._logger.info(f"Weather request failed: {e}, mock data used")
             mock_temps = ["Cold", "Mild", "Hot"]
             mock_precip = ["Dry", "Raining"]
             cur_temp = random.choice(mock_temps)
@@ -313,8 +451,29 @@ class Runner():
 
         self._weather = (cur_temp, cur_precip)
 
+    def weather_effects(self):
+        """
+        Prints out the effects of the current weather to display on the
+        screen of the current turn.
+        """
+        if self._weather[0] == "Hot":
+            print("The weather is hot, bug count +5 and morale -5")
+        elif self._weather[0] == "Cold":
+            print("Brrrr...cold weather. Coffee -5 and moral -5")
+        else:
+            print("Nice day out, weather is mild")
+
+        if self._weather[1] == "Wet":
+            print("What a nice day...its raining. Take cover inside. -5 Cash\
+                  and -5 Morale.")
+        else:
+            print("Nice dry day, no rain!")
+
     @property
     def current_game(self):
+        """
+        Returns the instances Game object.
+        """
         return self._game
 
 
