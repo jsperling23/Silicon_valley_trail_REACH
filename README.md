@@ -56,11 +56,11 @@ To force mock data during development, you can disable the network or simply let
 Silicon_valley_trail_REACH/
 ├── src/
 │   ├── main.py        # Entry point — sets up logging and runs the game loop
-│   ├── runner.py      # Runner class — manages I/O and turn logic
+│   ├── runner.py      # Runner class — manages I/O, API calls, and turn logic
 │   ├── game.py        # Game class — tracks and updates player state
 │   └── data.py        # Data — Event dataclass and Location dataclass
 ├── tests/
-│   └── test_runner.py # Test suite for Runner and Game
+│   └── test_runner.py # Test suite for Runner
 ├── save_files/        # JSON save files created at runtime
 ├── conftest.py        # Shared pytest fixtures
 ├── pyproject.toml     # Pytest configuration
@@ -74,7 +74,7 @@ Silicon_valley_trail_REACH/
 
 **`Game`** — This handles the state of the game. Tracks cash, coffee, bugs, morale, hype, location, and day. No I/O. Exposes methods to update and read state for the Runner class.
 
-**`data.py`** — This file contains static game data that `Runner` uses to update the game state as the game progresses. Defines the `Event` dataclass and the four data tables:`CHOICES`, `RANDOM_EVENT`, and `SIDE_EFFECTS`. The `Locations` dataclass is defined here as well and contains a data table, `LOCATIONS`, which represents a map of all the locations a player has to travel through.
+**`data.py`** — This file contains static game data that `Runner` uses to update the game state as the game progresses. Defines the `Event` dataclass and the three data tables:`CHOICES`, `RANDOM_EVENT`, and `SIDE_EFFECTS`. The `Locations` dataclass is defined here as well and contains a data table, `LOCATIONS`, which represents a map of all the locations a player has to travel through.
 
 ### Dependencies
 
