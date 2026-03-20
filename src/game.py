@@ -113,7 +113,8 @@ class Game:
             [type, cash, coffee, bugs, morale, hype].
 
         Returns:
-            list[int]: Total net changes for [type, cash, coffee, bugs, morale, hype]
+            list[int]: Total net changes for
+                       [type, cash, coffee, bugs, morale, hype]
         """
         changes = [0 for x in range(5)]
         if updates:

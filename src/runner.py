@@ -207,7 +207,7 @@ class Runner():
 
         """
         random_event = None
-        chance = 1#random.randint(1, 4)
+        chance = random.randint(1, 4)
         if chance == 1:
             self._logger.info("A random event roll has hit")
             os.system('clear')
