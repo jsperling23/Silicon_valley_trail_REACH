@@ -14,7 +14,7 @@ A terminal-based adventure game inspired by the Oregon Trail, set in Silicon Val
 
 ```bash
 # 1. Clone the repository
-git clone (https://github.com/jsperling23/Silicon_valley_trail_REACH.git)
+git clone https://github.com/jsperling23/Silicon_valley_trail_REACH.git
 cd Silicon_valley_trail_REACH
 
 # 2. Create and activate a virtual environment
