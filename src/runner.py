@@ -114,6 +114,7 @@ class Runner():
             self.current_game.update_state(changes)
             changes = []
             if not self.check_stats():
+                self._win = False
                 return
 
         # Get input from user and check if the save_flag is True
