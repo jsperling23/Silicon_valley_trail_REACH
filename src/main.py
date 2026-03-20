@@ -21,6 +21,5 @@ while True:
         logger.info("Game won")
         break
     elif game_runner._win is False:
-        print("Too bad! You have lost, try again!")
         logger.info("Game lost")
         break

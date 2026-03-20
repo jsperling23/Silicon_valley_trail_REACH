@@ -69,21 +69,22 @@ SIDE_EFFECTS = {
 
 
 CHOICES = [
-    Event("Pitch to an Investor", 10, -5, 0, 10, 0, False, 0),
-    Event("Speak at a Conferece", 0, -5, 0, 0, 10, False, 1),
+    Event("Pitch to an Investor", 10, -10, 0, 10, 0, False, 0),
+    Event("Speak at a Conferece", 0, -10, 0, -10, 10, False, 1),
     Event("Get Supplies", -10, 20, 0, 0, 0, False, 2),
     Event("Work on Product", 0, -10, -10, 0, 0, False, 3),
-    Event("Rest", 0, 0, 5, 10, 10, False, 4)
+    Event("Rest", 0, 0, 5, 10, 10, False, 4),
+    Event("Post Update on LinkedIn", -10, -10, 0, 0, 10, False, 5)
 ]
 
 
 RANDOM_EVENT = [
     Event("Freak Thunderstorm", -20, 0, 0, -20, 0, True, 0),
-    Event("Positive Investor Email", +20, 0, 0, 20, 20, False, 1),
+    Event("Positive Investor Email", 20, 0, 0, 20, 20, False, 1),
     Event("Git Force Push to Main", 0, -10, 20, -10, 0, False, 2),
     Event("AWS Servers Down", 0, -10, 0, -10, -10, False, 3),
     Event("Influencer Callout", 0, 0, 0, 20, 20, False, 4),
-    Event("Lightbulb Idea", -10, -10, 5, +10, 0, False, 5),
+    Event("Lightbulb Idea", -10, -10, 5, 10, 0, False, 5),
     Event("Taco Truck!!", -10, 0, 0, 10, 0, False, 6),
     Event("Waymo Stuck Wrong Way on 280, Traffic Jam!", -10, 0, 0, -20, 0,
           True, 7)

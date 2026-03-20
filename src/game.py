@@ -113,12 +113,12 @@ class Game:
             [type, cash, coffee, bugs, morale, hype].
 
         Returns:
-            list[int]: Total net changes for [cash, coffee, bugs, morale, hype]
+            list[int]: Total net changes for [type, cash, coffee, bugs, morale, hype]
         """
         changes = [0 for x in range(5)]
         if updates:
             for change in updates:
-                print(change)
+                self._logger.info(change)
                 self.update_cash(change[1])
                 changes[0] += change[1]
                 self.update_coffee(change[2])
@@ -130,6 +130,7 @@ class Game:
                 self.update_hype(change[5])
                 changes[4] += change[5]
             self._logger.info("Game state updated")
+        self._logger.info(f"Changes in this turn: {changes}")
         return changes
 
     def advance_location(self) -> Location:

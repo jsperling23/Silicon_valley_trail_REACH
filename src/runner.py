@@ -49,7 +49,7 @@ class Runner():
         being filled.
         """
         self._logger.info("Game Started")
-        os.system("clear")
+        self.clear_screen()
         choice = None
         print("""
               Welcome to the Silicon Valley Trail!!\n
@@ -106,6 +106,12 @@ class Runner():
             random_event = self.random_event()
         self.weather_request()
 
+        # Update state prior to user seeing it if random event
+        if random_event:
+            self.fill_changes_buffer(random_event, changes)
+            self.current_game.update_state(changes)
+            changes = []
+
         # Get input from user and check if the save_flag is True
         choice = self.get_user_input()
         if self._save_flag is True:
@@ -113,8 +119,6 @@ class Runner():
             return
 
         # Begin filling changes list
-        if random_event:
-            self.fill_changes_buffer(random_event, changes)
         self.fill_changes_buffer(choice, changes)
 
         # If there is a freak thunderstorm ignore the weather
@@ -123,9 +127,10 @@ class Runner():
             self.fill_changes_buffer(SIDE_EFFECTS[self._weather[1]], changes)
 
         # Apply changes, check if still alive, and move forward
-        self._game.update_state(changes)
+        self.current_game.update_state(changes)
         if not self.check_stats():
             self._win = False
+            return
 
         # Check whether the party can move or not depending on the random event
         if random_event is not None and random_event.delay is True:
@@ -133,7 +138,7 @@ class Runner():
             self._game.increment_day()
         else:
             self._game.advance_location()
-        self.travel_animation()
+            self.travel_animation()
 
         return
 
@@ -142,9 +147,8 @@ class Runner():
         With certain random events, the party is unable to move forward. This
         function prints out a message letting the user know.
         """
-        os.system("clear")
-        print(f"Because of {random_event.type}, you are stuck in {self._game.current_location.name}.\
-              and will not move forward today")
+        self.clear_screen()
+        print(f"Because of {random_event.type}, you are stuck in {self._game.current_location.name} and will not move forward today")
         input("Press enter to continue")
 
     def check_stats(self) -> bool:
@@ -164,29 +168,29 @@ class Runner():
         if self._game:
             if self._game.current_cash <= 0:
                 alive = False
-                os.system("clear")
-                print("Unfortunately you ran out of cash and can't afford to \
-                      move on")
+                self.clear_screen()
+                print("Unfortunately you ran out of cash and can't afford to move on.\n\n")
+                input("Press enter to make your way out")
             elif self._game.current_coffee <= 0:
                 alive = False
-                os.system("clear")
-                print("Unfortunately you ran out of coffee and are too tired \
-                      to continue")
+                self.clear_screen()
+                print("Unfortunately you ran out of coffee and are too tired to continue\n\n")
+                input("Press enter to make your way out")
             elif self._game.current_bugs > 50:
                 alive = False
-                os.system("clear")
-                print("Your app has too many bugs, it fails to work and you \
-                      lose.")
+                self.clear_screen()
+                print("Your app has too many bugs, it fails to work and you lose.\n\n")
+                input("Press enter to make your way out")
             elif self._game.current_morale <= 0:
                 alive = False
-                os.system("clear")
-                print("Your team is too depressed to continue, morale is too \
-                      low.")
+                self.clear_screen()
+                print("Your team is too depressed to continue, morale is too low.\n\n")
+                input("Press enter to make your way out")
             elif self._game.current_hype <= 0:
                 alive = False
-                os.system("clear")
-                print("The hype for your product is too low, nobody wants it. \
-                      You fail.")
+                self.clear_screen()
+                print("The hype for your product is too low, nobody wants it. You fail.\n\n")
+                input("Press enter to make your way out")
             elif self._game.current_location.name == "San Francisco":
                 alive = True
         return alive
@@ -203,7 +207,7 @@ class Runner():
 
         """
         random_event = None
-        chance = random.randint(1, 4)
+        chance = 1#random.randint(1, 4)
         if chance == 1:
             self._logger.info("A random event roll has hit")
             os.system('clear')
@@ -269,7 +273,7 @@ class Runner():
         """
         # List save files and print them to screen
         files = os.listdir("save_files")
-        os.system("Clear")
+        self.clear_screen()
         for i in range(len(files)):
             print(f"{i}: {files[i]}")
         chosen_file = None
@@ -304,7 +308,7 @@ class Runner():
         Prompts the user to enter in their choice of filename and
         attempts to save to that filename.
         """
-        os.system("clear")
+        self.clear_screen()
         save_state = self._game.state
         file_name = input("Please enter a file name:", )
         file_name = file_name.split('.')[0] + ".json"
@@ -322,7 +326,7 @@ class Runner():
         Clears the screen, gets the current game stats, puts them in a
         dictionary, and prints them to the screen
         """
-        os.system("clear")
+        self.clear_screen()
         stats = (f"""Your Current Stats:\n
                 Cash: {self._game.current_cash}
                 Coffee: {self._game.current_coffee}
@@ -349,23 +353,26 @@ class Runner():
         choice = None
         save = False
 
-        # Show player their current stats and their location
-        self.get_current_stats()
-
-        # Show the player how the weather affects their stats
-        self.weather_effects()
-
         # Get the players choice and verify it is correct
-        while choice is None and save is False:
-            temp = None
-            print(f"\nEnter the number of your given choice or Press '{len(CHOICES)}' to save and quit\n")
+        random_choices = random.sample(CHOICES, 4)
 
-            for i in range(len(CHOICES)):
-                print(f"""{i}: {CHOICES[i].type}
-                        Cash -> {CHOICES[i].cash}
-                        Coffee -> {CHOICES[i].coffee}
-                        Bugs -> {CHOICES[i].bugs} Morale -> {CHOICES[i].morale}
-                        Hype -> {CHOICES[i].hype}
+        while choice is None and save is False:
+            # Show player their current stats and their location
+            self.get_current_stats()
+
+            # Show the player how the weather affects their stats
+            self.weather_effects()
+
+            temp = None
+            print(f"\nEnter the number of your given choice or Press '{len(random_choices)}' to save and quit\n")
+
+            for i in range(len(random_choices)):
+                print(f"""{i}: {random_choices[i].type}
+                        Cash -> {random_choices[i].cash}
+                        Coffee -> {random_choices[i].coffee}
+                        Bugs -> {random_choices[i].bugs}
+                        Morale -> {random_choices[i].morale}
+                        Hype -> {random_choices[i].hype}
                 """)
 
             try:
@@ -374,13 +381,13 @@ class Runner():
                 print("That is not a number, try again")
 
             if temp is not None:
-                if temp == len(CHOICES):
+                if temp == len(random_choices):
                     save = True
                     self._save_flag = True
-                elif temp >= 0 and temp < len(CHOICES):
+                elif temp >= 0 and temp < len(random_choices):
                     choice = temp
 
-        return None if choice is None else CHOICES[choice]
+        return None if choice is None else random_choices[choice]
 
     def travel_animation(self) -> None:
         """
@@ -394,7 +401,7 @@ class Runner():
             ]
         for i in range(2):
             for string in travel_deck:
-                os.system("clear")
+                self.clear_screen()
                 print(string)
                 time.sleep(0.5)
 
@@ -464,10 +471,16 @@ class Runner():
             print("Nice day out, weather is mild")
 
         if self._weather[1] == "Wet":
-            print("What a nice day...its raining. Take cover inside. -5 Cash\
-                  and -5 Morale.")
+            print("What a nice day...its raining. Take cover inside. -5 Cash and -5 Morale.")
         else:
             print("Nice dry day, no rain!")
+
+    def clear_screen(self) -> None:
+        """
+        Checks operating system and uses the correct code to clear
+        the terminal.
+        """
+        os.system("cls" if os.name == "nt" else "clear")
 
     @property
     def current_game(self):
@@ -475,8 +488,3 @@ class Runner():
         Returns the instances Game object.
         """
         return self._game
-
-
-if __name__ == "__main__":
-    run = Runner()
-    run.load_game()
