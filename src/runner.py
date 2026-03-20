@@ -78,7 +78,9 @@ class Runner():
                     game = self.load_game()
                     choice = temp
                     if game is False:
-                        choice = None
+                        choice = 0
+                        print("File load failed, new game started")
+                        game = self.new_game()
                         self._logger.info("Something went wrong loading that \
                                           file...")
                 else:
@@ -272,7 +274,13 @@ class Runner():
             error occurred during loading.
         """
         # List save files and print them to screen
-        files = os.listdir("save_files")
+        try:
+            files = os.listdir("save_files")
+            if len(files) == 0:
+                return False
+        except FileNotFoundError as e:
+            self._logger.info(f'File not Found: {e}')
+            return False
         self.clear_screen()
         for i in range(len(files)):
             print(f"{i}: {files[i]}")
