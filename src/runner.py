@@ -113,6 +113,8 @@ class Runner():
             self.fill_changes_buffer(random_event, changes)
             self.current_game.update_state(changes)
             changes = []
+            if not self.check_stats():
+                return
 
         # Get input from user and check if the save_flag is True
         choice = self.get_user_input()
@@ -445,7 +447,7 @@ class Runner():
 
             if temp < 50:
                 cur_temp = "Cold"
-            elif 50 > temp < 80:
+            elif 50 <= temp < 80:
                 cur_temp = "Mild"
             else:
                 cur_temp = "Hot"
