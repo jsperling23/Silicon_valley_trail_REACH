@@ -68,12 +68,13 @@ Silicon_valley_trail_REACH/
 ```
 
 ### Key Components
+**`main.py`** - This initializes the logger instance, the `Runner` class instance, starts the game, and handles the game loop. It performs checks on each loop to see if win or loss flags int he `Runner` class are set.
 
 **`Runner`** — This controls everything related to the `Game` instance state. Handles all user input/output, manages all state changes each turn, calls the weather API, applies random events, and determines win/loss conditions.
 
 **`Game`** — This handles the state of the game. Tracks cash, coffee, bugs, morale, hype, location, and day. No I/O. Exposes methods to update and read state for the Runner class.
 
-**`data.py`** — This file contains static game data that `Runner` uses to update the game state as the game progresses. Defines the `Event` dataclass and the four data tables:`CHOICES`, `RANDOM_EVENT`, and `SIDE_EFFECTS`. The `Locations` dataclass is defined here as well and contains a data table, `LOCATIONS` representing a map of all the locations a player has to travel through.
+**`data.py`** — This file contains static game data that `Runner` uses to update the game state as the game progresses. Defines the `Event` dataclass and the four data tables:`CHOICES`, `RANDOM_EVENT`, and `SIDE_EFFECTS`. The `Locations` dataclass is defined here as well and contains a data table, `LOCATIONS`, which represents a map of all the locations a player has to travel through.
 
 ### Dependencies
 
